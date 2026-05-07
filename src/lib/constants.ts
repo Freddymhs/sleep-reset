@@ -15,6 +15,30 @@ export const STORAGE_KEYS = {
 /** Minutes the wake anchor advances each Monday toward the target wake time. */
 export const WAKE_ANCHOR_ADVANCE_MINUTES = 20 as const;
 
+/** Minutes ahead of the wake anchor during which the light banner is shown. */
+export const LIGHT_BANNER_WINDOW_MINUTES = 30 as const;
+
+/** Minutes subtracted from avg bedtime to compute melatonin time (5.5 hours). */
+export const MELATONIN_OFFSET_MINUTES = 330 as const;
+
+/**
+ * Max minutes a nightly bedtime recommendation can shift toward the target
+ * in a single night.
+ */
+export const MAX_BEDTIME_SHIFT_MINUTES = 30 as const;
+
+/** Number of recent sleep logs used when computing averages. */
+export const RECENT_LOGS_COUNT = 3 as const;
+
+/**
+ * Minutes threshold for "night hours" crossover.
+ * Hours < NIGHT_HOUR_THRESHOLD are treated as post-midnight (add 1440 min).
+ */
+export const NIGHT_HOUR_THRESHOLD = 12 as const;
+
+/** Minutes in a full day (24 * 60). */
+export const MINUTES_PER_DAY = 1440 as const;
+
 /** Table names — prevents magic strings across data-access hooks. */
 export const DB_TABLES = {
   SLEEP_LOGS: "sleep_logs",
