@@ -1,0 +1,15 @@
+{
+  "project": "sleep-reset",
+  "tech": "WXT + React 18 + TypeScript + TailwindCSS + Supabase",
+  "current_phase": "FASE_0",
+  "phases": {
+    "FASE_0": { "status": "pending", "tasks": 4, "total": 4 },
+    "FASE_1": { "status": "pending", "tasks": 4, "total": 4 },
+    "FASE_2": { "status": "pending", "tasks": 3, "total": 3 },
+    "FASE_3": { "status": "pending", "tasks": 4, "total": 4 },
+    "FASE_4": { "status": "pending", "tasks": 3, "total": 3 },
+    "FASE_5": { "status": "pending", "tasks": 5, "total": 5 },
+    "FASE_6": { "status": "pending", "tasks": 3, "total": 3 },
+    "FASE_7": { "status": "pending", "tasks": 4, "total": 4 }
+  }
+}
