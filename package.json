@@ -1,7 +1,7 @@
 {
-  "name": "template-chrome-extension",
+  "name": "sleep-reset",
   "version": "0.1.0",
-  "description": "Chrome Extension template — WXT + React + TypeScript + TailwindCSS",
+  "description": "Chrome Extension para corregir horario de sueño con registro diario y recomendación gradual",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,6 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
     "@wxt-dev/module-react": "^1.2.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
