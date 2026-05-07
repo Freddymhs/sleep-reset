@@ -11,7 +11,7 @@ import {
   NIGHT_HOUR_THRESHOLD,
   RECENT_LOGS_COUNT,
 } from "./constants";
-import type { ISODatetime, ProtocolRecommendation, SleepGoal, SleepLog, TimeString } from "./types";
+import type { ISODate, ISODatetime, ProtocolRecommendation, SleepGoal, SleepLog, TimeString } from "./types";
 
 /**
  * Formats a timestamptz ISO string to a local HH:MM string.
@@ -182,5 +182,150 @@ export function calcBedtimeRecommendation(
     melatoninTime,
     wakeAnchor,
     phaseAComplete,
+  };
+}
+
+// ─── Sleep duration (minutes) ─────────────────────────────────────────────────
+
+/**
+ * Returns the sleep duration in minutes for a single log, or null when either
+ * bedtime or wake_time is missing.
+ */
+export function calcDurationMinutes(log: SleepLog): number | null {
+  if (!log.bedtime || !log.wake_time) return null;
+  const bedMs = new Date(log.bedtime).getTime();
+  const wakeMs = new Date(log.wake_time).getTime();
+  return Math.max(0, Math.round((wakeMs - bedMs) / 60_000));
+}
+
+// ─── Week stats ────────────────────────────────────────────────────────────────
+
+/** Colour class for a bar given sleep duration (minutes), or null for no data. */
+export type SleepBarColor = "green" | "yellow" | "red" | "gray";
+
+const SLEEP_DURATION_GREEN_THRESHOLD_MINUTES = 7 * 60; // ≥ 7h
+const SLEEP_DURATION_YELLOW_THRESHOLD_MINUTES = 5 * 60; // ≥ 5h (< 7h is yellow)
+
+/** Returns the colour bucket for a duration in minutes, or "gray" if null. */
+export function sleepBarColor(durationMinutes: number | null): SleepBarColor {
+  if (durationMinutes === null) return "gray";
+  if (durationMinutes >= SLEEP_DURATION_GREEN_THRESHOLD_MINUTES) return "green";
+  if (durationMinutes >= SLEEP_DURATION_YELLOW_THRESHOLD_MINUTES) return "yellow";
+  return "red";
+}
+
+/** One cell in the 7-day chart — always present, even for days without data. */
+export interface DaySlot {
+  /** ISO date string (YYYY-MM-DD). */
+  date: ISODate;
+  /** Abbreviated weekday in Spanish locale ("Lun", "Mar", …). */
+  label: string;
+  /** Duration in minutes, or null when no complete log exists. */
+  durationMinutes: number | null;
+  /** Colour of the bar/indicator. */
+  color: SleepBarColor;
+  /** Formatted duration string like "7h 30m", or null. */
+  durationLabel: string | null;
+  /** Formatted bedtime "HH:MM" for the tooltip, or null. */
+  bedtimeLabel: string | null;
+  /** Formatted wake time "HH:MM" for the tooltip, or null. */
+  wakeTimeLabel: string | null;
+}
+
+const WEEKDAY_LABELS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"] as const;
+const DAYS_IN_HISTORY = 7 as const;
+
+/**
+ * Builds a 7-element array of DaySlot (most recent last) from a raw SleepLog
+ * array that may have gaps.
+ *
+ * @param logs  Raw rows from getRecentLogs(7) — any order, may have gaps.
+ * @param today ISO date of "today" (YYYY-MM-DD). Defaults to current local date.
+ */
+export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
+  const todayDate = today ?? (() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
+  })();
+
+  // Index logs by date for O(1) lookup
+  const logByDate = new Map<string, SleepLog>(logs.map((l) => [l.date, l]));
+
+  const slots: DaySlot[] = [];
+
+  for (let i = DAYS_IN_HISTORY - 1; i >= 0; i--) {
+    const d = new Date(todayDate);
+    d.setDate(d.getDate() - i);
+    const isoDate = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+    const label = WEEKDAY_LABELS_ES[d.getDay()];
+
+    const log = logByDate.get(isoDate) ?? null;
+    const durationMinutes = log ? calcDurationMinutes(log) : null;
+    const color = sleepBarColor(durationMinutes);
+
+    const durationLabel = durationMinutes !== null ? calcDuration(log!.bedtime!, log!.wake_time!) : null;
+    const bedtimeLabel = log?.bedtime ? formatTime(log.bedtime) : null;
+    const wakeTimeLabel = log?.wake_time ? formatTime(log.wake_time) : null;
+
+    slots.push({ date: isoDate, label, durationMinutes, color, durationLabel, bedtimeLabel, wakeTimeLabel });
+  }
+
+  return slots;
+}
+
+/** Aggregate statistics computed from a 7-day log set. */
+export interface WeekStats {
+  /** Average sleep duration in minutes across days with complete data, or null. */
+  avgMinutes: number | null;
+  /** Human-readable avg string like "7h 15m", or null. */
+  avgLabel: string | null;
+  /** Date of the best (longest) sleep day among the 7, or null. */
+  bestDate: ISODate | null;
+  /** Duration of the best day formatted as "8h 00m", or null. */
+  bestLabel: string | null;
+  /** Number of consecutive days (ending today) with at least a bedtime logged. */
+  streakDays: number;
+}
+
+/**
+ * Computes aggregate statistics for the week given a set of DaySlots (built
+ * with buildDaySlots). Only slots with complete data (both bedtime and wake)
+ * are counted toward avg and best.
+ */
+export function calcWeekStats(slots: DaySlot[]): WeekStats {
+  const completeSlots = slots.filter((s) => s.durationMinutes !== null);
+
+  if (completeSlots.length === 0) {
+    return { avgMinutes: null, avgLabel: null, bestDate: null, bestLabel: null, streakDays: 0 };
+  }
+
+  const totalMinutes = completeSlots.reduce((sum, s) => sum + s.durationMinutes!, 0);
+  const avgMinutes = Math.round(totalMinutes / completeSlots.length);
+  const avgHours = Math.floor(avgMinutes / 60);
+  const avgMins = avgMinutes % 60;
+  const avgLabel = `${avgHours}h ${avgMins.toString().padStart(2, "0")}m`;
+
+  const bestSlot = completeSlots.reduce((best, s) =>
+    s.durationMinutes! > best.durationMinutes! ? s : best,
+  );
+
+  // Streak: count consecutive days ending today where bedtime or wake was logged
+  // (uses durationMinutes to detect any complete record)
+  const slotsNewestFirst = [...slots].reverse();
+  let streakDays = 0;
+  for (const slot of slotsNewestFirst) {
+    if (slot.durationMinutes !== null) {
+      streakDays++;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    avgMinutes,
+    avgLabel,
+    bestDate: bestSlot.date,
+    bestLabel: bestSlot.durationLabel,
+    streakDays,
   };
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sleep Reset — Privacy Policy</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 680px;
+      margin: 48px auto;
+      padding: 0 24px;
+      color: #1a1a2e;
+      line-height: 1.7;
+    }
+    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; }
+    p, ul { margin: 0.5rem 0; }
+    ul { padding-left: 1.5rem; }
+    .updated { color: #666; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <h1>Sleep Reset — Privacy Policy</h1>
+  <p class="updated">Last updated: May 7, 2026</p>
+
+  <h2>What data we collect</h2>
+  <p>Sleep Reset collects only the data you explicitly provide:</p>
+  <ul>
+    <li>Your Google account email (used for authentication via Supabase OAuth).</li>
+    <li>Sleep logs you record: bedtime timestamps, wake-time timestamps, and optional notes.</li>
+    <li>Your sleep goal configuration (target bedtime, target wake time, melatonin preferences).</li>
+  </ul>
+
+  <h2>How we use your data</h2>
+  <p>Your data is used exclusively to:</p>
+  <ul>
+    <li>Authenticate you and associate your logs with your account.</li>
+    <li>Display your sleep history and compute personalized gradual-shift recommendations.</li>
+  </ul>
+  <p>We do not sell, share, or transfer your data to any third party for advertising or analytics purposes.</p>
+
+  <h2>Where data is stored</h2>
+  <p>
+    Data is stored in a Supabase PostgreSQL database hosted on secure infrastructure.
+    Your sleep logs are accessible only to your authenticated account.
+  </p>
+
+  <h2>Local storage</h2>
+  <p>
+    The extension stores your Supabase session token in <code>chrome.storage.local</code>
+    so you stay logged in between popup opens. This data never leaves your device.
+  </p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>storage</strong> — to persist your session and settings locally.</li>
+    <li><strong>identity</strong> — to initiate Google OAuth login via the Chrome identity API.</li>
+  </ul>
+
+  <h2>Data deletion</h2>
+  <p>
+    You can request deletion of all your data by contacting us at
+    <a href="mailto:fmarcosdev@gmail.com">fmarcosdev@gmail.com</a>.
+    We will delete your account and all associated sleep logs within 30 days.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    If this policy changes materially, we will update the "Last updated" date above.
+    Continued use of the extension after changes constitutes acceptance of the new policy.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions or concerns: <a href="mailto:fmarcosdev@gmail.com">fmarcosdev@gmail.com</a>
+  </p>
+</body>
+</html>
