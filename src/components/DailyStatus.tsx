@@ -22,12 +22,16 @@ export function DailyStatus({ log }: DailyStatusProps) {
 
   if (log.bedtime !== null && log.wake_time !== null) {
     const duration = calcDuration(log.bedtime, log.wake_time);
+    const isPremature = log.quality === "premature";
     return (
       <div className="text-center">
-        <p className="text-xs text-gray-400 mb-1">Duración de sueño</p>
+        <p className="text-xs text-gray-400 mb-1">
+          {isPremature ? "Sueño interrumpido" : "Duración de sueño"}
+        </p>
         <p className="text-2xl font-semibold text-white">{duration}</p>
         <p className="text-xs text-gray-500 mt-1">
           {formatTime(log.bedtime)} → {formatTime(log.wake_time)}
+          {isPremature && " · 😞"}
         </p>
       </div>
     );

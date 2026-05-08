@@ -71,10 +71,15 @@ create table sleep_logs (
   date        date not null,
   bedtime     timestamptz,
   wake_time   timestamptz,
-  source      text default 'manual',  -- 'manual' | 'apple_watch'
+  source      text default 'manual',           -- 'manual' | 'apple_watch'
   notes       text,
-  created_at  timestamptz default now()
+  quality     text not null default 'normal',  -- 'normal' | 'premature'
+  created_at  timestamptz default now(),
+  unique (user_id, date)
 );
+-- 'premature' marca despertares forzados antes de tiempo (no pudo volver a dormir).
+-- Cuenta en promedios pero se renderiza distinto en el historial.
+-- Sesión activa = bedtime IS NOT NULL AND wake_time IS NULL (cualquier fecha).
 
 -- Meta y configuración del protocolo (una fila activa por usuario)
 create table sleep_goals (

@@ -20,6 +20,9 @@ export type TimeString = string;
 /** Source of a sleep log entry. */
 export type SleepLogSource = "manual" | "import";
 
+/** Quality flag for a sleep log — affects history visualization, not algorithm averages. */
+export type SleepQuality = "normal" | "premature";
+
 // ─── SleepLog ──────────────────────────────────────────────────────────────────
 
 /** Matches the `sleep_logs` table row. */
@@ -32,6 +35,8 @@ export interface SleepLog {
   /** How the entry was created. */
   source: SleepLogSource;
   notes: string | null;
+  /** Quality flag — 'premature' marks nights with early forced wake. */
+  quality: SleepQuality;
   created_at: ISODatetime;
 }
 

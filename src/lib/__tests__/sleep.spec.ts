@@ -18,6 +18,7 @@ function makeLog(bedtime: string | null, date = "2026-05-07"): SleepLog {
     bedtime,
     wake_time: null,
     source: "manual",
+    quality: "normal",
     notes: null,
     created_at: new Date().toISOString(),
   };

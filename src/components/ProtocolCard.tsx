@@ -13,6 +13,8 @@ import type { ProtocolRecommendation, SleepGoal } from "../lib/types";
 interface ProtocolCardProps {
   recommendation: ProtocolRecommendation | null;
   goal: SleepGoal | null;
+  /** True when there's at least 1 sleep log with bedtime in recent history. */
+  hasLogs: boolean;
 }
 
 interface PillarRowProps {
@@ -33,7 +35,7 @@ function PillarRow({ emoji, label, value }: PillarRowProps) {
   );
 }
 
-export function ProtocolCard({ recommendation, goal }: ProtocolCardProps) {
+export function ProtocolCard({ recommendation, goal, hasLogs }: ProtocolCardProps) {
   if (!goal) {
     return (
       <div className="bg-gray-800 rounded-2xl p-4">
@@ -44,14 +46,20 @@ export function ProtocolCard({ recommendation, goal }: ProtocolCardProps) {
     );
   }
 
-  if (!recommendation) {
+  // Day 1 calibration: no historical bedtimes yet → can't compute the gradual shift.
+  // Honest message instead of suggesting the absolute target (which would be too aggressive).
+  if (!recommendation || !hasLogs) {
     return (
       <div className="bg-gray-800 rounded-2xl p-4">
         <p className="text-xs text-gray-500 text-center uppercase tracking-wide mb-3">
           Protocolo de esta noche
         </p>
-        <p className="text-sm text-gray-400 text-center">
-          Registra al menos un bedtime para ver la recomendación
+        <p className="text-sm text-gray-300 text-center font-medium">
+          Esta noche: dormite ~30 min antes de tu hora habitual
+        </p>
+        <p className="text-xs text-gray-500 text-center mt-2">
+          La recomendación se ajustará después de 1-2 noches con datos reales.
+          Forzar la meta directa fracasa por biología — el reloj se mueve gradualmente.
         </p>
       </div>
     );
