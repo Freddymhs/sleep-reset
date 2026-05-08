@@ -71,7 +71,7 @@ flowchart TB
     useAuth --> Supabase
     useSL --> Supabase
     useSG --> Supabase
-    useAuth --> useStorage
+    useAuth -->|"browser.storage.local"| storage[("chrome.storage\n.local")]
     Rec --> Sleep
     Stats --> Sleep
 ```

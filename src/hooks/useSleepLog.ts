@@ -64,21 +64,32 @@ export async function logBedtime(): Promise<SleepLog> {
 }
 
 /**
- * Logs wake time for today (updates existing record).
- * Throws if no bedtime record exists for today.
+ * Logs wake time on the most recent log that has a bedtime but no wake_time yet.
+ * Handles the cross-midnight case: bedtime logged at 11pm (yesterday), wake at 9am (today).
  *
  * @returns The updated SleepLog row.
  */
 export async function logWakeTime(): Promise<SleepLog> {
   const userId = await resolveUserId();
-  const today = getTodayDate();
   const now = new Date().toISOString();
+
+  const { data: pending, error: fetchError } = await supabase
+    .from(SLEEP_LOGS_TABLE)
+    .select("*")
+    .eq("user_id", userId)
+    .not("bedtime", "is", null)
+    .is("wake_time", null)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (!pending) throw new Error("No hay registro de bedtime pendiente");
 
   const { data, error } = await supabase
     .from(SLEEP_LOGS_TABLE)
     .update({ wake_time: now })
-    .eq("user_id", userId)
-    .eq("date", today)
+    .eq("id", pending.id)
     .select()
     .single();
 

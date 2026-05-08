@@ -7,11 +7,13 @@
 
 export type ExtensionMessage =
   | { type: "PING" }
-  | { type: "GET_DATA"; payload: { url: string } };
+  | { type: "GET_DATA"; payload: { url: string } }
+  | { type: "AUTH_SIGN_OUT" };
 
 export type ExtensionResponse =
   | { type: "PONG" }
-  | { type: "DATA"; payload: unknown };
+  | { type: "DATA"; payload: unknown }
+  | { type: "AUTH_SIGN_OUT_ACK" };
 
 export async function sendMessage(
   message: ExtensionMessage,

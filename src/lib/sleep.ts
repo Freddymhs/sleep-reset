@@ -114,15 +114,15 @@ function timeStringToMinutes(time: TimeString): number {
 }
 
 /**
- * Returns true when the current time is within the morning light window —
- * i.e., at or before wake_anchor + LIGHT_BANNER_WINDOW_MINUTES.
+ * Returns true when the current time is within the morning light window:
+ * wake_anchor ≤ now ≤ wake_anchor + LIGHT_BANNER_WINDOW_MINUTES.
  *
- * This tells the user to go get morning light exposure right now.
+ * Only shows AFTER waking up, not the whole night before.
  */
 export function shouldShowLightBanner(goal: SleepGoal, now: Date): boolean {
   const wakeAnchorMin = timeStringToMinutes(goal.current_wake_anchor);
   const nowMin = now.getHours() * 60 + now.getMinutes();
-  return nowMin <= wakeAnchorMin + LIGHT_BANNER_WINDOW_MINUTES;
+  return nowMin >= wakeAnchorMin && nowMin <= wakeAnchorMin + LIGHT_BANNER_WINDOW_MINUTES;
 }
 
 // ─── TimeString night-minutes helper ──────────────────────────────────────────
@@ -171,7 +171,8 @@ export function calcBedtimeRecommendation(
 
   const diff = avgBedtimeMin - targetBedtimeMin;
   const shift = Math.min(Math.max(diff, 0), MAX_BEDTIME_SHIFT_MINUTES);
-  const suggestedMin = avgBedtimeMin - shift;
+  // Never suggest earlier than the target bedtime
+  const suggestedMin = Math.max(avgBedtimeMin - shift, targetBedtimeMin);
 
   const wakeAnchor = goal.current_wake_anchor.slice(0, 5); // normalize to HH:MM
   const melatoninTime = calcMelatoninTime(recentLogs);

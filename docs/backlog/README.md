@@ -6,14 +6,53 @@ Chrome Extension (WXT + React 18 + TypeScript + TailwindCSS + Supabase OAuth).
 
 | Fase | Nombre | Status |
 |------|--------|--------|
-| FASE_0 | Base — Fundación técnica | ⏸️ PENDIENTE |
-| FASE_1 | Autenticación OAuth | ⏸️ PENDIENTE |
-| FASE_2 | Estructura del Popup | ⏸️ PENDIENTE |
-| FASE_3 | Sleep Logging | ⏸️ PENDIENTE |
-| FASE_4 | Sleep Goal (Meta) | ⏸️ PENDIENTE |
-| FASE_5 | Motor del Protocolo — 3 Pilares + Recomendación | ⏸️ PENDIENTE |
-| FASE_6 | Historial 7 días | ⏸️ PENDIENTE |
-| FASE_7 | Chrome Web Store | ⏸️ PENDIENTE |
+| FASE_0 | Base — Fundación técnica | ✅ COMPLETADA (4/4) |
+| FASE_1 | Autenticación OAuth | ✅ COMPLETADA (4/4) |
+| FASE_2 | Estructura del Popup | ✅ COMPLETADA (3/3) |
+| FASE_3 | Sleep Logging | ✅ COMPLETADA (4/4) |
+| FASE_4 | Sleep Goal (Meta) | ✅ COMPLETADA (3/3) |
+| FASE_5 | Motor del Protocolo — 3 Pilares + Recomendación | ✅ COMPLETADA (5/5) |
+| FASE_6 | Historial 7 días | ✅ COMPLETADA (3/3) |
+| FASE_7 | Chrome Web Store | ✅ COMPLETADA (4/4) |
+
+## 🎉 Proyecto completado
+
+Todas las fases implementadas. La extensión está lista para uso personal.
+
+**Pendientes manuales (no son código):**
+- Capturas de pantalla para Chrome Web Store (requieren datos reales)
+- Registrar redirect URL OAuth en Supabase al publicar con el ID de producción
+
+## Detalle de tareas
+
+| Fase | Tarea | Descripción | Status |
+|------|-------|-------------|--------|
+| FASE_1 | 1.A | useAuth hook | ✅ Completada |
+| FASE_1 | 1.B | Background auth message handler | ✅ Completada |
+| FASE_1 | 1.C | LoginScreen component | ✅ Completada |
+| FASE_1 | 1.D | AuthGuard en App.tsx | ✅ Completada |
+| FASE_2 | 2.A | App.tsx — Shell con Panel Navigation | ✅ Completada |
+| FASE_2 | 2.B | BottomNav component | ✅ Completada |
+| FASE_2 | 2.C | Panel placeholders (Home, History, Settings) | ✅ Completada |
+| FASE_3 | 3.A | useSleepLog hook + Supabase CRUD | ✅ Completada |
+| FASE_3 | 3.B | SleepLogger component | ✅ Completada |
+| FASE_3 | 3.C | DailyStatus component | ✅ Completada |
+| FASE_3 | 3.D | HomePanel integración | ✅ Completada |
+| FASE_4 | 4.A | useSleepGoal hook (CRUD + wake anchor advance) | ✅ Completada |
+| FASE_4 | 4.B | ProtocolSetupForm component | ✅ Completada |
+| FASE_4 | 4.C | SettingsPanel integración | ✅ Completada |
+| FASE_5 | 5.A | sleep.ts funciones puras (toNightMinutes, calcMelatoninTime…) | ✅ Completada |
+| FASE_5 | 5.B | Tests unitarios (29 tests) | ✅ Completada |
+| FASE_5 | 5.C | ProtocolCard component | ✅ Completada |
+| FASE_5 | 5.D | LightBanner component | ✅ Completada |
+| FASE_5 | 5.E | HomePanel — integración 4 bloques | ✅ Completada |
+| FASE_6 | 6.A | sleep.ts — funciones de stats y buildDaySlots | ✅ Completada |
+| FASE_6 | 6.B | SleepHistoryChart + SleepStats components | ✅ Completada |
+| FASE_6 | 6.C | HistoryPanel integración | ✅ Completada |
+| FASE_7 | 7.A | Íconos 16/32/48/128px | ✅ Completada |
+| FASE_7 | 7.B | wxt.config.ts — manifest completo | ✅ Completada |
+| FASE_7 | 7.C | public/privacy.html | ✅ Completada |
+| FASE_7 | 7.D | Store assets (manual — requiere datos reales) | ⏳ Manual |
 
 ## Diagramas de Referencia
 

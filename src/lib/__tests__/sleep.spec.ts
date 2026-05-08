@@ -151,26 +151,38 @@ describe("calcMelatoninTime", () => {
 // ─── shouldShowLightBanner ─────────────────────────────────────────────────────
 
 describe("shouldShowLightBanner", () => {
-  it("returns true when now is before wake_anchor + 30 min", () => {
-    // wake_anchor = 09:00 → window until 09:30
+  it("returns false before wake_anchor (still night)", () => {
+    // wake_anchor = 09:00 — at 08:45 the user hasn't woken up yet
     const now = new Date();
     now.setHours(8, 45, 0, 0);
+    expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(false);
+  });
+
+  it("returns true exactly at wake_anchor", () => {
+    const now = new Date();
+    now.setHours(9, 0, 0, 0);
     expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(true);
   });
 
-  it("returns true when now is exactly at wake_anchor + 30 min", () => {
+  it("returns true within the 30-min window after wake_anchor", () => {
+    const now = new Date();
+    now.setHours(9, 20, 0, 0);
+    expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(true);
+  });
+
+  it("returns true exactly at wake_anchor + 30 min", () => {
     const now = new Date();
     now.setHours(9, 30, 0, 0);
     expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(true);
   });
 
-  it("returns false when now is after wake_anchor + 30 min", () => {
+  it("returns false after wake_anchor + 30 min", () => {
     const now = new Date();
     now.setHours(9, 31, 0, 0);
     expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(false);
   });
 
-  it("returns false well after the window (e.g. afternoon)", () => {
+  it("returns false well after the window (afternoon)", () => {
     const now = new Date();
     now.setHours(15, 0, 0, 0);
     expect(shouldShowLightBanner(BASE_GOAL, now)).toBe(false);

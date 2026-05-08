@@ -35,7 +35,7 @@ export function ProtocolSetupForm({ goal, onSave }: ProtocolSetupFormProps) {
   const [targetWake, setTargetWake] = useState("06:00");
   const [targetBedtime, setTargetBedtime] = useState("22:00");
   const [phaseAWake, setPhaseAWake] = useState("09:00");
-  const [melatoninEnabled, setMelatoninEnabled] = useState(false);
+  const [melatoninEnabled, setMelatoninEnabled] = useState(true);
   const [melatoninDose, setMelatoninDose] = useState<number>(MELATONIN_DEFAULT_DOSE);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -67,6 +67,7 @@ export function ProtocolSetupForm({ goal, onSave }: ProtocolSetupFormProps) {
         melatonin_dose_mg: melatoninEnabled ? melatoninDose : 0,
       });
       setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Error al guardar el protocolo");
     } finally {

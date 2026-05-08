@@ -6,7 +6,8 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
     "jsx": "react-jsx",
-    "types": ["chrome"]
+    "types": ["chrome", "vite/client"],
+    "skipLibCheck": true
   },
   "include": ["src", "entrypoints", "wxt.config.ts"]
 }

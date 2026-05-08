@@ -34,8 +34,13 @@ export function HomePanel() {
   const [recentLogs, setRecentLogs] = useState<SleepLog[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Capture `now` once per mount — avoids impure reads inside memoized values.
-  const [now] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date());
+
+  // Update `now` every minute so LightBanner window stays accurate.
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const refreshLogs = useCallback(async () => {
     try {

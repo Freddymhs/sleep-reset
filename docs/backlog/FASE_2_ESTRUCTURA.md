@@ -1,6 +1,6 @@
 # FASE 2: Estructura del Popup
 
-**Status**: ⏸️ PENDIENTE
+**Status**: ✅ COMPLETADA (3/3)
 **Prioridad**: Alta
 **Dependencias**: FASE_1
 
@@ -39,6 +39,6 @@ La navegación es state local en App.tsx — sin router, sin hash. Paneles simpl
 
 ## Criterios de Aceptación
 
-- [ ] Clic en cada botón del BottomNav muestra el panel correspondiente
-- [ ] Dimensiones del popup son consistentes entre panels
-- [ ] `npm run compile` y `npm run lint` pasan
+- [x] Clic en cada botón del BottomNav muestra el panel correspondiente
+- [x] Dimensiones del popup son consistentes entre panels
+- [x] `npm run compile` y `npm run lint` pasan

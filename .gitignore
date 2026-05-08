@@ -31,3 +31,7 @@ yarn-error.log*
 # AI / Dev tools
 .claude/settings.local.json
 .serena/
+client_secret*
+
+# Supabase CLI temp
+supabase/.temp/

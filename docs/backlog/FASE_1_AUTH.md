@@ -1,6 +1,6 @@
 # FASE 1: Autenticación OAuth
 
-**Status**: ⏸️ PENDIENTE
+**Status**: ✅ COMPLETADA (4/4)
 **Prioridad**: Alta
 **Dependencias**: FASE_0
 
@@ -65,8 +65,8 @@ Supabase lo soporta con `signInWithOAuth({ provider, options: { redirectTo } })`
 
 ## Criterios de Aceptación
 
-- [ ] Login con Google abre popup del sistema y cierra al completar
-- [ ] Sesión persiste al cerrar y reabrir el popup
-- [ ] `signOut()` limpia sesión en Supabase y en storage local
-- [ ] Sin sesión → siempre muestra LoginScreen (no hay datos expuestos)
-- [ ] `npm run compile` y `npm run lint` pasan
+- [x] Login con Google abre popup del sistema y cierra al completar
+- [x] Sesión persiste al cerrar y reabrir el popup
+- [x] `signOut()` limpia sesión en Supabase y en storage local
+- [x] Sin sesión → siempre muestra LoginScreen (no hay datos expuestos)
+- [x] `npm run compile` y `npm run lint` pasan
