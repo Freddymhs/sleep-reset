@@ -12,6 +12,12 @@ import type { SleepLog } from "../lib/types";
 const SLEEP_LOGS_TABLE = DB_TABLES.SLEEP_LOGS;
 
 /**
+ * Active sessions older than this are ignored — most likely an abandoned log.
+ * Forcing the user to start fresh prevents stale-state confusion.
+ */
+const ACTIVE_SESSION_MAX_AGE_HOURS = 36 as const;
+
+/**
  * Returns today's date in ISO 8601 format (YYYY-MM-DD) using local timezone.
  */
 function getTodayDate(): string {
@@ -34,11 +40,11 @@ async function resolveUserId(): Promise<string> {
 }
 
 /**
- * Logs bedtime for today.
- * - If no log exists for today → INSERT.
- * - If a log already exists → UPDATE bedtime only.
+ * Logs bedtime as a fresh session.
+ * Multiple sessions per date are allowed (DSPD recovery often involves
+ * fragmented sleep — premature wake + retry the same night).
  *
- * @returns The upserted SleepLog row.
+ * @returns The newly inserted SleepLog row.
  */
 export async function logBedtime(): Promise<SleepLog> {
   const userId = await resolveUserId();
@@ -47,15 +53,12 @@ export async function logBedtime(): Promise<SleepLog> {
 
   const { data, error } = await supabase
     .from(SLEEP_LOGS_TABLE)
-    .upsert(
-      {
-        user_id: userId,
-        date: today,
-        bedtime: now,
-        source: "manual",
-      },
-      { onConflict: "user_id,date" },
-    )
+    .insert({
+      user_id: userId,
+      date: today,
+      bedtime: now,
+      source: "manual",
+    })
     .select()
     .single();
 
@@ -65,8 +68,9 @@ export async function logBedtime(): Promise<SleepLog> {
 
 /**
  * Returns the active session: a log with bedtime but no wake_time yet,
- * regardless of date. This is what determines if "Voy a dormir" or
- * "Me desperté/Despertar prematuro" should be shown.
+ * regardless of date — but only if it's recent (< ACTIVE_SESSION_MAX_AGE_HOURS).
+ * Stale sessions (e.g., user abandoned the app for days) are ignored so the
+ * UI doesn't show confusing old state.
  */
 export async function getActiveLog(): Promise<SleepLog | null> {
   const userId = await resolveUserId();
@@ -77,12 +81,20 @@ export async function getActiveLog(): Promise<SleepLog | null> {
     .eq("user_id", userId)
     .not("bedtime", "is", null)
     .is("wake_time", null)
-    .order("date", { ascending: false })
+    .order("bedtime", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (error) throw error;
-  return data as SleepLog | null;
+  if (!data) return null;
+
+  const log = data as SleepLog;
+  if (log.bedtime === null) return null;
+
+  const ageHours = (Date.now() - new Date(log.bedtime).getTime()) / 3_600_000;
+  if (ageHours > ACTIVE_SESSION_MAX_AGE_HOURS) return null;
+
+  return log;
 }
 
 /**
@@ -119,6 +131,52 @@ export async function logWakeTime(): Promise<SleepLog> {
  */
 export async function logPrematureWake(): Promise<SleepLog> {
   return completeActiveSession("premature");
+}
+
+/**
+ * Registers a complete past sleep session (both bedtime and wake_time at once).
+ * Use when the user collapsed without logging — common in DSPD recovery.
+ *
+ * Both inputs are local "HH:MM" strings for today. The function builds the
+ * appropriate ISO timestamps assuming bedtime was today (or yesterday if
+ * the bedtime hour is greater than the wake hour, indicating cross-midnight).
+ */
+export async function logManualSession(
+  bedtimeHHMM: string,
+  wakeTimeHHMM: string,
+): Promise<SleepLog> {
+  const userId = await resolveUserId();
+  const today = new Date();
+  const [bH, bM] = bedtimeHHMM.split(":").map(Number);
+  const [wH, wM] = wakeTimeHHMM.split(":").map(Number);
+
+  // Wake time is always today; bedtime is yesterday if it's later in the
+  // wall clock than the wake (e.g. bedtime 23:00, wake 09:00).
+  const wake = new Date(today);
+  wake.setHours(wH, wM, 0, 0);
+
+  const bed = new Date(today);
+  bed.setHours(bH, bM, 0, 0);
+  if (bed.getTime() > wake.getTime()) {
+    bed.setDate(bed.getDate() - 1);
+  }
+
+  const dateForRow = `${bed.getFullYear()}-${(bed.getMonth() + 1).toString().padStart(2, "0")}-${bed.getDate().toString().padStart(2, "0")}`;
+
+  const { data, error } = await supabase
+    .from(SLEEP_LOGS_TABLE)
+    .insert({
+      user_id: userId,
+      date: dateForRow,
+      bedtime: bed.toISOString(),
+      wake_time: wake.toISOString(),
+      source: "manual",
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as SleepLog;
 }
 
 /**

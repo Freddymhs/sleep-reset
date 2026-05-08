@@ -59,8 +59,13 @@ export function LightBanner({ goal, now }: LightBannerProps) {
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-yellow-300">
-          Son las {timeDisplay} — ve a la ventana 15 minutos ahora
+          Son las {timeDisplay} — luz matutina 15 min ahora
         </p>
+        <ul className="mt-1.5 space-y-0.5 text-[11px] text-yellow-200/80">
+          <li>• Ventana con luz directa, o</li>
+          <li>• Lámpara 10,000 lux a ~50cm, o</li>
+          <li>• Lugar más iluminado de la casa si está nublado</li>
+        </ul>
         <button
           type="button"
           onClick={handleDone}

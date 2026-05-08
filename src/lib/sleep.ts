@@ -70,7 +70,10 @@ export function toNightMinutes(isoTimestamp: ISODatetime): number {
  *   1440 → "00:00"
  */
 export function fromNightMinutes(nightMinutes: number): string {
-  const wrapped = nightMinutes % MINUTES_PER_DAY;
+  // Round first — averages can produce fractional minutes that would render
+  // as "21.5" without this normalization.
+  const rounded = Math.round(nightMinutes);
+  const wrapped = ((rounded % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
   const h = Math.floor(wrapped / 60).toString().padStart(2, "0");
   const m = (wrapped % 60).toString().padStart(2, "0");
   return `${h}:${m}`;
@@ -237,38 +240,94 @@ const WEEKDAY_LABELS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"] as
 const DAYS_IN_HISTORY = 7 as const;
 
 /**
+ * Parses a "YYYY-MM-DD" string as a local-timezone Date (NOT UTC, which is
+ * what `new Date("YYYY-MM-DD")` does — that bug shifts the calendar by 1 day
+ * in negative-UTC timezones).
+ */
+function parseLocalDate(iso: ISODate): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** Formats a Date as "YYYY-MM-DD" in local timezone. */
+function formatLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = (date.getMonth() + 1).toString().padStart(2, "0");
+  const d = date.getDate().toString().padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
  * Builds a 7-element array of DaySlot (most recent last) from a raw SleepLog
- * array that may have gaps.
+ * array that may have gaps OR multiple sessions per date (DSPD users may
+ * sleep morning + night). When multiple sessions exist for a date, they are
+ * aggregated: total duration sum, earliest bedtime, latest wake_time, and
+ * 'premature' quality if any session was premature.
  *
- * @param logs  Raw rows from getRecentLogs(7) — any order, may have gaps.
+ * @param logs  Raw rows from getRecentLogs(N) — any order, may have gaps.
  * @param today ISO date of "today" (YYYY-MM-DD). Defaults to current local date.
  */
 export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
-  const todayDate = today ?? (() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
-  })();
+  const todayDate = today ?? formatLocalDate(new Date());
 
-  // Index logs by date for O(1) lookup
-  const logByDate = new Map<string, SleepLog>(logs.map((l) => [l.date, l]));
+  // Group logs by date — multiple sessions per date are valid.
+  const logsByDate = new Map<string, SleepLog[]>();
+  for (const log of logs) {
+    const list = logsByDate.get(log.date) ?? [];
+    list.push(log);
+    logsByDate.set(log.date, list);
+  }
 
   const slots: DaySlot[] = [];
+  const todayParsed = parseLocalDate(todayDate);
 
   for (let i = DAYS_IN_HISTORY - 1; i >= 0; i--) {
-    const d = new Date(todayDate);
+    const d = new Date(todayParsed);
     d.setDate(d.getDate() - i);
-    const isoDate = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+    const isoDate = formatLocalDate(d);
     const label = WEEKDAY_LABELS_ES[d.getDay()];
 
-    const log = logByDate.get(isoDate) ?? null;
-    const durationMinutes = log ? calcDurationMinutes(log) : null;
-    const color = sleepBarColor(durationMinutes);
+    const dayLogs = logsByDate.get(isoDate) ?? [];
+    const completeLogs = dayLogs.filter((l) => l.bedtime !== null && l.wake_time !== null);
 
-    const durationLabel = durationMinutes !== null ? calcDuration(log!.bedtime!, log!.wake_time!) : null;
-    const bedtimeLabel = log?.bedtime ? formatTime(log.bedtime) : null;
-    const wakeTimeLabel = log?.wake_time ? formatTime(log.wake_time) : null;
+    if (completeLogs.length === 0) {
+      slots.push({
+        date: isoDate,
+        label,
+        durationMinutes: null,
+        color: "gray",
+        durationLabel: null,
+        bedtimeLabel: null,
+        wakeTimeLabel: null,
+      });
+      continue;
+    }
 
-    slots.push({ date: isoDate, label, durationMinutes, color, durationLabel, bedtimeLabel, wakeTimeLabel });
+    // Aggregate: sum durations, earliest bedtime, latest wake.
+    const totalMinutes = completeLogs.reduce(
+      (sum, l) => sum + (calcDurationMinutes(l) ?? 0),
+      0,
+    );
+    const earliestBedtime = completeLogs
+      .map((l) => l.bedtime!)
+      .reduce((a, b) => (a < b ? a : b));
+    const latestWake = completeLogs
+      .map((l) => l.wake_time!)
+      .reduce((a, b) => (a > b ? a : b));
+
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const durationLabel = `${hours}h ${mins.toString().padStart(2, "0")}m`;
+
+    slots.push({
+      date: isoDate,
+      label,
+      durationMinutes: totalMinutes,
+      color: sleepBarColor(totalMinutes),
+      durationLabel,
+      bedtimeLabel: formatTime(earliestBedtime),
+      wakeTimeLabel: formatTime(latestWake),
+    });
   }
 
   return slots;

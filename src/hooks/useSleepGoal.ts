@@ -116,6 +116,10 @@ async function runAdvanceWakeAnchor(
   if (error) throw error;
 
   await browser.storage.local.set({ [storageKey]: todayISO });
+  // Flag the phase_advance coaching tip so HomePanel can surface it.
+  await browser.storage.local.set({
+    [STORAGE_KEYS.COACHING_PHASE_ADVANCE_PENDING]: true,
+  });
   return updated as SleepGoal;
 }
 

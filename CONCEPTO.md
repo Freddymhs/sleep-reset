@@ -74,12 +74,15 @@ create table sleep_logs (
   source      text default 'manual',           -- 'manual' | 'apple_watch'
   notes       text,
   quality     text not null default 'normal',  -- 'normal' | 'premature'
-  created_at  timestamptz default now(),
-  unique (user_id, date)
+  created_at  timestamptz default now()
 );
 -- 'premature' marca despertares forzados antes de tiempo (no pudo volver a dormir).
 -- Cuenta en promedios pero se renderiza distinto en el historial.
 -- Sesión activa = bedtime IS NOT NULL AND wake_time IS NULL (cualquier fecha).
+-- Múltiples sesiones por día permitidas — DSPD fragmenta el sueño:
+-- el usuario puede dormir de mañana (colapso) + intentar de nuevo a la noche.
+-- El historial agrega las sesiones por día (suma duración, earliest bedtime,
+-- latest wake) para mostrar el total real de sueño del día.
 
 -- Meta y configuración del protocolo (una fila activa por usuario)
 create table sleep_goals (
