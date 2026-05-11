@@ -6,7 +6,7 @@
  */
 
 import { supabase } from "../lib/supabase";
-import { DB_TABLES } from "../lib/constants";
+import { DB_TABLES, MIN_SESSION_MINUTES } from "../lib/constants";
 import type { SleepLog } from "../lib/types";
 
 const SLEEP_LOGS_TABLE = DB_TABLES.SLEEP_LOGS;
@@ -100,10 +100,21 @@ export async function getActiveLog(): Promise<SleepLog | null> {
 /**
  * Updates wake_time on the active session with the given quality flag.
  * 'normal' = expected wake. 'premature' = woke too early, couldn't fall back asleep.
+ *
+ * Refuses to complete sessions shorter than MIN_SESSION_MINUTES — those are
+ * almost certainly misclicks. The user should use "Anular esta noche" instead.
  */
 async function completeActiveSession(quality: "normal" | "premature"): Promise<SleepLog> {
   const active = await getActiveLog();
   if (!active) throw new Error("No hay registro de bedtime pendiente");
+  if (!active.bedtime) throw new Error("Sesión activa sin bedtime — estado inválido");
+
+  const ageMinutes = (Date.now() - new Date(active.bedtime).getTime()) / 60_000;
+  if (ageMinutes < MIN_SESSION_MINUTES) {
+    throw new Error(
+      `Solo pasaron ${Math.round(ageMinutes)} min desde que marcaste bedtime. Si fue por error, usá "Anular esta noche".`,
+    );
+  }
 
   const now = new Date().toISOString();
   const { data, error } = await supabase
@@ -137,9 +148,9 @@ export async function logPrematureWake(): Promise<SleepLog> {
  * Registers a complete past sleep session (both bedtime and wake_time at once).
  * Use when the user collapsed without logging — common in DSPD recovery.
  *
- * Both inputs are local "HH:MM" strings for today. The function builds the
- * appropriate ISO timestamps assuming bedtime was today (or yesterday if
- * the bedtime hour is greater than the wake hour, indicating cross-midnight).
+ * Validations:
+ *  - bedtime != wake (zero-duration sleeps are user error)
+ *  - no existing completed session for the computed date (prevents duplicates)
  */
 export async function logManualSession(
   bedtimeHHMM: string,
@@ -161,7 +172,31 @@ export async function logManualSession(
     bed.setDate(bed.getDate() - 1);
   }
 
+  const durationMinutes = (wake.getTime() - bed.getTime()) / 60_000;
+  if (durationMinutes < MIN_SESSION_MINUTES) {
+    throw new Error(
+      `Duración mínima ${MIN_SESSION_MINUTES} min. Verificá las horas ingresadas.`,
+    );
+  }
+
   const dateForRow = `${bed.getFullYear()}-${(bed.getMonth() + 1).toString().padStart(2, "0")}-${bed.getDate().toString().padStart(2, "0")}`;
+
+  // Block duplicates: refuse if any completed session already exists for that date.
+  const { data: existing, error: checkError } = await supabase
+    .from(SLEEP_LOGS_TABLE)
+    .select("id")
+    .eq("user_id", userId)
+    .eq("date", dateForRow)
+    .not("bedtime", "is", null)
+    .not("wake_time", "is", null)
+    .limit(1);
+
+  if (checkError) throw checkError;
+  if (existing && existing.length > 0) {
+    throw new Error(
+      `Ya hay sueño registrado el ${dateForRow}. Borralo primero si querés reemplazarlo.`,
+    );
+  }
 
   const { data, error } = await supabase
     .from(SLEEP_LOGS_TABLE)

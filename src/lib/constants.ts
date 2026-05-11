@@ -22,6 +22,12 @@ export const PREMATURE_TIP_WINDOW_HOURS = 8 as const;
 /** Minimum count of premature awakenings in 7 days to trigger the streak_break tip. */
 export const PREMATURE_STREAK_THRESHOLD = 3 as const;
 
+/**
+ * Minimum sleep duration in minutes to accept a session.
+ * Below this is treated as a misclick — user should use "Anular esta noche".
+ */
+export const MIN_SESSION_MINUTES = 5 as const;
+
 /** Minutes the wake anchor advances each Monday toward the target wake time. */
 export const WAKE_ANCHOR_ADVANCE_MINUTES = 20 as const;
 
