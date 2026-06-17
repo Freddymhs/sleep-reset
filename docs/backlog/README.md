@@ -14,12 +14,15 @@ Chrome Extension (WXT + React 18 + TypeScript + TailwindCSS + Supabase OAuth).
 | FASE_5 | Motor del Protocolo — 3 Pilares + Recomendación | ✅ COMPLETADA (5/5) |
 | FASE_6 | Historial 7 días | ✅ COMPLETADA (3/3) |
 | FASE_7 | Chrome Web Store | ✅ COMPLETADA (4/4) |
+| FASE_8 | Esfuerzo Mental ↔ Calidad de Despertar | ⏸️ PENDIENTE (0/7) |
 
-## 🎉 Proyecto completado
+## 📍 Actual
 
-Todas las fases implementadas. La extensión está lista para uso personal.
+FASE_8 → diseño listo en `FASE_8_ESFUERZO_MENTAL.md`. Resolver dudas abiertas antes de codear 8.A.
 
-**Pendientes manuales (no son código):**
+## ✅ MVP completado (FASE 0–7)
+
+Reset de sueño implementado y funcionando. Pendientes manuales (no código):
 - Capturas de pantalla para Chrome Web Store (requieren datos reales)
 - Registrar redirect URL OAuth en Supabase al publicar con el ID de producción
 
@@ -53,6 +56,13 @@ Todas las fases implementadas. La extensión está lista para uso personal.
 | FASE_7 | 7.B | wxt.config.ts — manifest completo | ✅ Completada |
 | FASE_7 | 7.C | public/privacy.html | ✅ Completada |
 | FASE_7 | 7.D | Store assets (manual — requiere datos reales) | ⏳ Manual |
+| FASE_8 | 8.A | Schema + tipos (migration 005 day_context + melatonin_doses) | ⏸️ Pendiente |
+| FASE_8 | 8.B | Data access (useDayContext + setMelatoninDoses) | ⏸️ Pendiente |
+| FASE_8 | 8.C | Lógica pura insights.ts + tests | ⏸️ Pendiente |
+| FASE_8 | 8.D | Captura UX (chips esfuerzo/estado + dosis) | ⏸️ Pendiente |
+| FASE_8 | 8.E | Overlay esfuerzo/estado en SleepHistoryChart | ⏸️ Pendiente |
+| FASE_8 | 8.F | Panel Insights (scatter + breakdowns + cruce) | ⏸️ Pendiente |
+| FASE_8 | 8.G | Pulido (recordatorio dosis, estados vacíos, lint/test) | ⏸️ Pendiente |
 
 ## Diagramas de Referencia
 
