@@ -27,16 +27,28 @@ No se salta directo a las 6am. Primero se recupera el horario que ya fue posible
 
 ## Protocolo de 3 Pilares
 
-### Pilar 1 — Melatonina con timing calculado
+### Pilar 1 — Melatonina (uso real: hipnótico)
 
-La melatonina NO se toma antes de dormir. Se toma 5-6 horas antes del sueño ACTUAL para avanzar el reloj.
+> **Corregido (2026-06-19).** Una versión previa de este documento describía un uso
+> *cronobiótico* idealizado (0.5mg, 5.5h antes, "nunca más"). El **uso real del usuario es
+> hipnótico** y es el que el producto modela y registra.
+
+La melatonina se toma para **inducir el sueño**, ~1h antes de querer dormir:
 
 ```
-melatonin_time = avg_current_bedtime - 5.5 horas
-dosis = 0.5mg (nunca más — más dosis = peor resultado)
+dosis     = 3mg, ~1h antes del sueño deseado
+si no duerme → 1 dosis adicional por hora
+máximo    = 3 dosis (observado una sola vez; casi siempre 2; nunca más de 3)
 ```
 
-La app muestra cada tarde: **"Tomá melatonina a las HH:MM esta noche"** y envía una notificación al badge de la extensión.
+Para el usuario esto **funciona y es valioso** — es una solución probada tras años de
+intentos. El registro de dosis (`melatonin_doses`, ver modelo de datos) es **descriptivo,
+no normativo**: cuenta el hecho, no juzga ni empuja a subir.
+
+> Nota fisiológica: el uso hipnótico tardío difiere del efecto cronobiótico de avance de
+> fase (dosis baja, timing temprano). El reset de fase en este proyecto se apoya
+> principalmente en los Pilares 2 (luz) y 3 (wake anchor) + la regularidad; la melatonina
+> aquí cumple el rol de **inductor de sueño**, no de zeitgeber.
 
 ### Pilar 2 — Protocolo de luz matutina
 
@@ -74,8 +86,11 @@ create table sleep_logs (
   source      text default 'manual',           -- 'manual' | 'apple_watch'
   notes       text,
   quality     text not null default 'normal',  -- 'normal' | 'premature'
+  melatonin_doses smallint not null default 1 check (melatonin_doses between 1 and 3),
   created_at  timestamptz default now()
 );
+-- melatonin_doses: dosis de 3mg tomadas en esa sesión (uso hipnótico real, ver Pilar 1).
+-- Default 1; rango 1-3 (casi siempre 2). Descriptivo. En noche fragmentada se suman.
 -- 'premature' marca despertares forzados antes de tiempo (no pudo volver a dormir).
 -- Cuenta en promedios pero se renderiza distinto en el historial.
 -- Sesión activa = bedtime IS NOT NULL AND wake_time IS NULL (cualquier fecha).
@@ -95,9 +110,9 @@ create table sleep_goals (
   phase_a_wake        time not null,   -- ej: 09:00 (Fase A — probado con trabajo)
   -- Wake anchor semanal (se actualiza cada lunes)
   current_wake_anchor time not null,   -- semana actual
-  -- Pilar 1: melatonina
+  -- Pilar 1: melatonina (uso hipnótico real)
   melatonin_enabled   boolean default true,
-  melatonin_dose_mg   numeric(4,2) default 0.5,
+  melatonin_dose_mg   numeric(4,2) default 3.0,   -- dosis por toma (real: 3mg)
   created_at          timestamptz default now(),
   updated_at          timestamptz default now()
 );
@@ -126,10 +141,11 @@ create table sleep_goals (
 ```
 PASO_MAXIMO_BEDTIME = 30 min/noche
 
---- Pilar 1: melatonina ---
-avg_bedtime = promedio bedtimes últimos 3 días
-melatonin_time = avg_bedtime - 5.5h
-→ "Tomá 0.5mg a las HH:MM"
+--- Pilar 1: melatonina (uso hipnótico real) ---
+target_sleep = bedtime deseado de esta noche
+melatonin_time = target_sleep - 1h
+→ "Tomá 3mg a las HH:MM"  (+1 dosis/hora si no logra dormir, máx 3)
+   Se registra melatonin_doses por sesión (descriptivo).
 
 --- Pilar 2: luz matutina ---
 on_popup_open():

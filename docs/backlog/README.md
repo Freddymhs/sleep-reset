@@ -18,7 +18,7 @@ Chrome Extension (WXT + React 18 + TypeScript + TailwindCSS + Supabase OAuth).
 
 ## 📍 Actual
 
-FASE_8 → diseño listo en `FASE_8_ESFUERZO_MENTAL.md`. Resolver dudas abiertas antes de codear 8.A.
+FASE_8 → diseño refinado y auditado en `FASE_8_ESFUERZO_MENTAL.md` (dudas D1/D2 resueltas). Listo para codear 8.A cuando se decida.
 
 ## ✅ MVP completado (FASE 0–7)
 
