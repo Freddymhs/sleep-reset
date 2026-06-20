@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "installedAt": "2026-06-20",
+  "skills": {
+    "supabase": {
+      "source": "global:~/.claude/.agents/skills/supabase",
+      "reason": "@supabase/supabase-js en deps + carpeta supabase/"
+    },
+    "vitest-testing-patterns": {
+      "source": "global:~/.claude/.agents/skills/vitest-testing-patterns",
+      "reason": "vitest en devDeps, tests en src/**/__tests__"
+    },
+    "tailwindcss-advanced-design-systems": {
+      "source": "global:~/.claude/.agents/skills/tailwindcss-advanced-design-systems",
+      "reason": "tailwindcss en devDeps, UI del popup"
+    },
+    "chrome-interactive": {
+      "source": "custom:~/.claude/skills/chrome-interactive",
+      "reason": "inspección visual/debug del popup de la extensión Chrome"
+    },
+    "playwright-interactive": {
+      "source": "custom:~/.claude/skills/playwright-interactive",
+      "reason": "build Firefox (dev:firefox) — testing multi-browser"
+    },
+    "accessibility": {
+      "source": "marketplace:addyosmani/web-quality-skills",
+      "reason": "auditoría WCAG de la UI del popup",
+      "skillInstalledAt": "2026-06-20"
+    },
+    "documentation-and-adrs": {
+      "source": "marketplace:addyosmani/agent-skills",
+      "reason": "ADRs para docs/decisions/ (ej. DECISION_DAY_CONTEXT pendiente)",
+      "skillInstalledAt": "2026-06-20"
+    }
+  }
+}
