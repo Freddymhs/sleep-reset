@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import type { DaySlot } from "../lib/sleep";
+import { ENERGY_STATE_META, MENTAL_EFFORT_META } from "../lib/constants";
 
 interface SleepHistoryChartProps {
   slots: DaySlot[];
@@ -93,6 +94,21 @@ function DayBar({ slot }: DayBarProps) {
       <p className="text-xs text-gray-500 leading-none text-center">
         {slot.durationLabel ?? "—"}
       </p>
+
+      {/* day-context overlay: effort color dot + energy emoji (reserved height) */}
+      <div className="flex items-center justify-center gap-0.5 h-3" aria-hidden="true">
+        {slot.mentalEffort && (
+          <span
+            className={`w-2 h-2 rounded-full ${MENTAL_EFFORT_META[slot.mentalEffort].color}`}
+            title={MENTAL_EFFORT_META[slot.mentalEffort].label}
+          />
+        )}
+        {slot.energyState && (
+          <span className="text-[10px] leading-none" title={ENERGY_STATE_META[slot.energyState].label}>
+            {ENERGY_STATE_META[slot.energyState].emoji}
+          </span>
+        )}
+      </div>
 
       {/* weekday label */}
       <p className="text-xs text-gray-400 font-medium leading-none">{slot.label}</p>

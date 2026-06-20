@@ -9,8 +9,10 @@
  */
 
 import { useState } from "react";
-import type { SleepLog } from "../lib/types";
+import type { DayContext, SleepLog } from "../lib/types";
 import { formatTime } from "../lib/sleep";
+import { DayContextCapture } from "./DayContextCapture";
+import type { DayContextInput } from "../hooks/useDayContext";
 
 interface SleepLoggerProps {
   /** The active session: bedtime != null && wake_time == null. Null when no session. */
@@ -21,6 +23,12 @@ interface SleepLoggerProps {
   onCancelActive: () => Promise<void>;
   /** For DSPD users who collapse without logging: backfill a complete past session. */
   onLogManualSession: (bedtimeHHMM: string, wakeTimeHHMM: string) => Promise<void>;
+  /** Today's saved day context (for the capture chips), or null. */
+  dayContext: DayContext | null;
+  /** Upsert today's day context (skippable capture). */
+  onUpsertDayContext: (input: DayContextInput) => Promise<void>;
+  /** Set melatonin doses on the active session. */
+  onSetMelatoninDoses: (n: number) => Promise<void>;
 }
 
 export function SleepLogger({
@@ -30,6 +38,9 @@ export function SleepLogger({
   onLogPrematureWake,
   onCancelActive,
   onLogManualSession,
+  dayContext,
+  onUpsertDayContext,
+  onSetMelatoninDoses,
 }: SleepLoggerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +88,13 @@ export function SleepLogger({
         >
           Despertar prematuro 😞
         </button>
+
+        <DayContextCapture
+          value={dayContext}
+          doses={activeLog.melatonin_doses}
+          onChange={onUpsertDayContext}
+          onSetDoses={onSetMelatoninDoses}
+        />
 
         <button
           onClick={wrap(onCancelActive, "Error al anular registro")}

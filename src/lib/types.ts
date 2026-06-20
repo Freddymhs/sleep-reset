@@ -23,6 +23,22 @@ export type SleepLogSource = "manual" | "import";
 /** Quality flag for a sleep log — affects history visualization, not algorithm averages. */
 export type SleepQuality = "normal" | "premature";
 
+/** Cognitive effort of the day (ordinal, 3 levels). */
+export type MentalEffort = "light" | "moderate" | "heavy";
+
+/** End-of-day energy/mood state (4 states — arousal × energy axes). */
+export type EnergyState =
+  | "wired_overactive"
+  | "drained_restless"
+  | "clear_calm"
+  | "bored_idle";
+
+/** Physical activity of the day (ordinal, 4 levels). */
+export type PhysicalActivity = "none" | "light" | "moderate" | "intense";
+
+/** Bodily tension at bedtime (binary — somatic arousal). */
+export type SomaticTension = "relaxed" | "tense";
+
 // ─── SleepLog ──────────────────────────────────────────────────────────────────
 
 /** Matches the `sleep_logs` table row. */
@@ -37,6 +53,8 @@ export interface SleepLog {
   notes: string | null;
   /** Quality flag — 'premature' marks nights with early forced wake. */
   quality: SleepQuality;
+  /** Melatonin doses taken this session (1–3; default 1). Summed per night. */
+  melatonin_doses: number;
   created_at: ISODatetime;
 }
 
@@ -45,6 +63,39 @@ export type NewSleepLog = Omit<SleepLog, "id" | "created_at">;
 
 /** Payload for updating an existing sleep log. */
 export type UpdateSleepLog = Partial<Omit<SleepLog, "id" | "user_id" | "created_at">>;
+
+// ─── DayContext ──────────────────────────────────────────────────────────────────
+
+/**
+ * Matches the `day_context` table row — one per day (upsert by user_id + date).
+ * Enum columns are nullable: capture is partial and skippable.
+ */
+export interface DayContext {
+  id: string;
+  user_id: string;
+  date: ISODate;
+  /** Cognitive effort of the day, or null if not captured. */
+  mental_effort: MentalEffort | null;
+  /** End-of-day energy/mood state, or null if not captured. */
+  energy_state: EnergyState | null;
+  /** Physical activity of the day, or null if not captured. */
+  physical_activity: PhysicalActivity | null;
+  /** Bodily tension at bedtime, or null if not captured. */
+  somatic_tension: SomaticTension | null;
+  notes: string | null;
+  created_at: ISODatetime;
+  /** Must be set explicitly by the client on every UPDATE — no DB trigger. */
+  updated_at: ISODatetime;
+}
+
+/** Payload for inserting a new day context (id and timestamps are DB-generated). */
+export type NewDayContext = Omit<DayContext, "id" | "created_at" | "updated_at">;
+
+/** Payload for updating an existing day context. */
+export type UpdateDayContext = Partial<Omit<DayContext, "id" | "user_id" | "created_at">> & {
+  /** Required on every update — DB has no trigger for this column. */
+  updated_at: ISODatetime;
+};
 
 // ─── SleepGoal ─────────────────────────────────────────────────────────────────
 

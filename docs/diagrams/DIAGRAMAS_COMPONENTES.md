@@ -36,13 +36,19 @@ flowchart TB
             Rec["Recommendation"]
             Status["DailyStatus"]
             Logger["SleepLogger"]
+            DayCtx["DayContextCapture"]
             useSL["useSleepLog"]
             useSG["useSleepGoal"]
+            useDC["useDayContext"]
         end
 
         subgraph History["Panel: History"]
             Chart["SleepHistoryChart"]
             Stats["SleepStats"]
+        end
+
+        subgraph Insights["Panel: Insights"]
+            InsP["InsightsPanel\n(scatter + breakdowns + cruce)"]
         end
 
         subgraph Settings["Panel: Settings"]
@@ -56,6 +62,7 @@ flowchart TB
         Supabase["supabase.ts\n(client singleton)"]
         Types["types.ts"]
         Sleep["sleep.ts\n(pure functions)"]
+        Insights2["insights.ts\n(collapseNights + breakdowns)"]
     end
 
     subgraph Hooks["src/hooks/"]
@@ -66,14 +73,19 @@ flowchart TB
     App --> Nav
     App --> Home
     App --> History
+    App --> Insights
     App --> Settings
 
+    Logger --> DayCtx
     useAuth --> Supabase
     useSL --> Supabase
     useSG --> Supabase
+    useDC --> Supabase
     useAuth -->|"browser.storage.local"| storage[("chrome.storage\n.local")]
     Rec --> Sleep
     Stats --> Sleep
+    InsP --> Insights2
+    Insights2 --> Sleep
 ```
 
 ## Flujo de Datos — Sleep Log

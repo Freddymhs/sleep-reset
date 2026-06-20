@@ -1,8 +1,14 @@
 # FASE 8: Esfuerzo Mental ↔ Calidad de Despertar (Correlación)
 
-**Status**: ⏸️ PENDIENTE
+**Status**: ✅ IMPLEMENTADO (2026-06-20)
 **Prioridad**: Media (post-MVP — el reset de sueño ya cumplió su objetivo)
 **Dependencias**: FASE_6 (historial), FASE_5 (lógica pura + tests)
+
+> **Divergencia de implementación (2026-06-20):** la captura (§6/8.D) se construyó
+> como chips embebidos en `SleepLogger` durante la sesión activa, no como paso
+> intermedio `showDayContextPrompt` tras marcar bedtime. Mismo intento (capturar
+> el contexto del día, skippable), enfoque más simple. El `DECISION_DAY_CONTEXT.md`
+> de §2 aún no se creó.
 
 > **Nota de proceso (2026-06-19):** Este documento fue auditado por 4 agentes de
 > código + 2 de investigación científica + 2 de contra-análisis ciego. Lo que sigue
@@ -403,8 +409,8 @@ indistinguible de lo contrario).
 7. **El contador de dosis se queda y refleja el uso real** (3mg hipnótico, +1/hora si no
    duerme, máx 3, casi siempre 2). Es descriptivo, no normativo. Esto **corrige** el modelo
    `0.5mg cronobiótico` de `CONCEPTO.md` (ver D2).
-8. Esta fase **no se construye aún** — el objetivo actual fue **mejorar la estructura del
-   documento**. Codear queda para después.
+8. ~~Esta fase **no se construye aún**~~ — **implementada el 2026-06-20** (migration 005,
+   tipos, hooks, `insights.ts` + tests, captura, overlay, panel Insights).
 9. **D1 resuelto — SÍ:** se adoptan `physical_activity` (4 niveles) y `somatic_tension`
    (binario) como dimensiones del modelo (§5). `bored_idle` se mantiene en `energy_state`;
    su causa medible la captura `physical_activity`.

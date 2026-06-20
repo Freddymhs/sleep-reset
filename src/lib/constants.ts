@@ -59,4 +59,78 @@ export const MINUTES_PER_DAY = 1440 as const;
 export const DB_TABLES = {
   SLEEP_LOGS: "sleep_logs",
   SLEEP_GOALS: "sleep_goals",
+  DAY_CONTEXT: "day_context",
 } as const;
+
+// ─── Day-context enum metadata (label ES + color + emoji) ──────────────────────
+// Single source of truth for how each enum value renders across capture chips,
+// history overlay, and the insights panel.
+
+import type {
+  MentalEffort,
+  EnergyState,
+  PhysicalActivity,
+  SomaticTension,
+} from "./types";
+
+/** Spanish label + Tailwind bg color + emoji per mental_effort value. */
+export const MENTAL_EFFORT_META: Record<
+  MentalEffort,
+  { label: string; color: string; emoji: string }
+> = {
+  light: { label: "Menor", color: "bg-emerald-500", emoji: "🌱" },
+  moderate: { label: "Moderado", color: "bg-amber-500", emoji: "⚖️" },
+  heavy: { label: "Mayor", color: "bg-rose-500", emoji: "🔥" },
+} as const;
+
+/** Spanish label + Tailwind bg color + emoji per energy_state value. */
+export const ENERGY_STATE_META: Record<
+  EnergyState,
+  { label: string; color: string; emoji: string }
+> = {
+  wired_overactive: { label: "Hiperactivo", color: "bg-orange-500", emoji: "⚡" },
+  drained_restless: { label: "Exhausto", color: "bg-purple-500", emoji: "🥀" },
+  clear_calm: { label: "Lúcido", color: "bg-sky-500", emoji: "🧘" },
+  bored_idle: { label: "Aburrido", color: "bg-slate-400", emoji: "😐" },
+} as const;
+
+/** Spanish label + Tailwind bg color + emoji per physical_activity value. */
+export const PHYSICAL_ACTIVITY_META: Record<
+  PhysicalActivity,
+  { label: string; color: string; emoji: string }
+> = {
+  none: { label: "Nada", color: "bg-slate-400", emoji: "🛋️" },
+  light: { label: "Poca", color: "bg-emerald-400", emoji: "🚶" },
+  moderate: { label: "Moderada", color: "bg-emerald-500", emoji: "🏃" },
+  intense: { label: "Intensa", color: "bg-emerald-600", emoji: "💪" },
+} as const;
+
+/** Spanish label + Tailwind bg color + emoji per somatic_tension value. */
+export const SOMATIC_TENSION_META: Record<
+  SomaticTension,
+  { label: string; color: string; emoji: string }
+> = {
+  relaxed: { label: "Relajado", color: "bg-sky-500", emoji: "😌" },
+  tense: { label: "Tenso", color: "bg-rose-500", emoji: "😣" },
+} as const;
+
+/**
+ * Wake-time range that scales the insights Y axis. No binary cutoff — earlier
+ * within the range is "better" (lower wakeMinutes average).
+ */
+export const WAKE_RANGE = { from: "04:00", to: "06:00" } as const;
+
+/** Valid melatonin dose count per session (see migration 005). */
+export const MELATONIN_DOSES_RANGE = { min: 1, max: 3 } as const;
+
+/**
+ * Minimum nights with data before the insights panel shows raw points.
+ * Below this: empty state only.
+ */
+export const INSIGHTS_MIN_NIGHTS_POINTS = 7 as const;
+
+/**
+ * Nights with data required before showing trend + N-of-1 disclaimer.
+ * Below this (but ≥ POINTS): "keep logging" message.
+ */
+export const INSIGHTS_MIN_NIGHTS_TREND = 14 as const;

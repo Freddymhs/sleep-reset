@@ -11,7 +11,17 @@ import {
   NIGHT_HOUR_THRESHOLD,
   RECENT_LOGS_COUNT,
 } from "./constants";
-import type { ISODate, ISODatetime, ProtocolRecommendation, SleepGoal, SleepLog, TimeString } from "./types";
+import type {
+  DayContext,
+  EnergyState,
+  ISODate,
+  ISODatetime,
+  MentalEffort,
+  ProtocolRecommendation,
+  SleepGoal,
+  SleepLog,
+  TimeString,
+} from "./types";
 
 /**
  * Formats a timestamptz ISO string to a local HH:MM string.
@@ -234,6 +244,10 @@ export interface DaySlot {
   bedtimeLabel: string | null;
   /** Formatted wake time "HH:MM" for the tooltip, or null. */
   wakeTimeLabel: string | null;
+  /** That day's mental effort (from day_context), or null if not captured. */
+  mentalEffort: MentalEffort | null;
+  /** That day's energy state (from day_context), or null if not captured. */
+  energyState: EnergyState | null;
 }
 
 const WEEKDAY_LABELS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"] as const;
@@ -264,10 +278,15 @@ function formatLocalDate(date: Date): string {
  * aggregated: total duration sum, earliest bedtime, latest wake_time, and
  * 'premature' quality if any session was premature.
  *
- * @param logs  Raw rows from getRecentLogs(N) — any order, may have gaps.
- * @param today ISO date of "today" (YYYY-MM-DD). Defaults to current local date.
+ * @param logs     Raw rows from getRecentLogs(N) — any order, may have gaps.
+ * @param contexts Optional day_context rows — merged by date for the overlay.
+ * @param today    ISO date of "today" (YYYY-MM-DD). Defaults to current local date.
  */
-export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
+export function buildDaySlots(
+  logs: SleepLog[],
+  contexts: DayContext[] = [],
+  today?: ISODate,
+): DaySlot[] {
   const todayDate = today ?? formatLocalDate(new Date());
 
   // Group logs by date — multiple sessions per date are valid.
@@ -277,6 +296,10 @@ export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
     list.push(log);
     logsByDate.set(log.date, list);
   }
+
+  // Index day_context by date for the overlay merge (one per date).
+  const contextByDate = new Map<string, DayContext>();
+  for (const c of contexts) contextByDate.set(c.date, c);
 
   const slots: DaySlot[] = [];
   const todayParsed = parseLocalDate(todayDate);
@@ -289,6 +312,9 @@ export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
 
     const dayLogs = logsByDate.get(isoDate) ?? [];
     const completeLogs = dayLogs.filter((l) => l.bedtime !== null && l.wake_time !== null);
+    const ctx = contextByDate.get(isoDate);
+    const mentalEffort = ctx?.mental_effort ?? null;
+    const energyState = ctx?.energy_state ?? null;
 
     if (completeLogs.length === 0) {
       slots.push({
@@ -299,6 +325,8 @@ export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
         durationLabel: null,
         bedtimeLabel: null,
         wakeTimeLabel: null,
+        mentalEffort,
+        energyState,
       });
       continue;
     }
@@ -327,6 +355,8 @@ export function buildDaySlots(logs: SleepLog[], today?: ISODate): DaySlot[] {
       durationLabel,
       bedtimeLabel: formatTime(earliestBedtime),
       wakeTimeLabel: formatTime(latestWake),
+      mentalEffort,
+      energyState,
     });
   }
 

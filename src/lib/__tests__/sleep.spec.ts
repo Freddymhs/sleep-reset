@@ -20,6 +20,7 @@ function makeLog(bedtime: string | null, date = "2026-05-07"): SleepLog {
     source: "manual",
     quality: "normal",
     notes: null,
+    melatonin_doses: 1,
     created_at: new Date().toISOString(),
   };
 }

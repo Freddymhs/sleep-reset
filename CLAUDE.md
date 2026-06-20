@@ -51,7 +51,7 @@ Sleep schedule correction app (see `CONCEPTO.md`). The planned feature set:
 - Gradual recommendation algorithm: max 30-min nightly shift toward goal
 - 7-day history
 
-Backend: Supabase PostgreSQL. Tables: `sleep_logs`, `sleep_goals`. Env vars needed: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (store in `.env.local`, never committed).
+Backend: Supabase PostgreSQL. Tables: `sleep_logs` (has `melatonin_doses`), `sleep_goals`, `day_context` (1 row/day, upstream day signals correlated with wake quality). Env vars needed: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (store in `.env.local`, never committed).
 
 Planned source structure (from CONCEPTO.md):
 ```

@@ -15,7 +15,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { SleepGoal, SleepLog } from "../../lib/types";
+import type { DayContext, SleepGoal, SleepLog } from "../../lib/types";
 import {
   getActiveLog,
   logBedtime,
@@ -24,7 +24,13 @@ import {
   cancelActiveLog,
   logManualSession,
   getRecentLogs,
+  setMelatoninDoses,
 } from "../../hooks/useSleepLog";
+import {
+  getDayContext,
+  upsertDayContext,
+  type DayContextInput,
+} from "../../hooks/useDayContext";
 import { useSleepGoal } from "../../hooks/useSleepGoal";
 import { useStorage } from "../../hooks/useStorage";
 import { calcBedtimeRecommendation } from "../../lib/sleep";
@@ -58,6 +64,7 @@ export function HomePanel() {
 
   const [activeLog, setActiveLog] = useState<SleepLog | null>(null);
   const [recentLogs, setRecentLogs] = useState<SleepLog[]>([]);
+  const [dayContext, setDayContext] = useState<DayContext | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const [firstSetupDismissed, setFirstSetupDismissed] = useStorage<boolean>(
@@ -78,12 +85,14 @@ export function HomePanel() {
 
   const refreshLogs = useCallback(async () => {
     try {
-      const [active, recent] = await Promise.all([
+      const [active, recent, context] = await Promise.all([
         getActiveLog(),
         getRecentLogs(RECENT_LOGS_FETCH_DAYS),
+        getDayContext(),
       ]);
       setActiveLog(active);
       setRecentLogs(recent);
+      setDayContext(context);
       setFetchError(null);
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : "Error al cargar registros");
@@ -120,6 +129,20 @@ export function HomePanel() {
       await refreshLogs();
     },
     [refreshLogs],
+  );
+
+  const handleUpsertDayContext = useCallback(async (input: DayContextInput) => {
+    const updated = await upsertDayContext(input);
+    setDayContext(updated);
+  }, []);
+
+  const handleSetMelatoninDoses = useCallback(
+    async (n: number) => {
+      if (!activeLog) return;
+      const updated = await setMelatoninDoses(activeLog.id, n);
+      setActiveLog(updated);
+    },
+    [activeLog],
   );
 
   // Today's most recent completed log — there may be multiple sessions
@@ -221,6 +244,9 @@ export function HomePanel() {
             onLogPrematureWake={handleLogPrematureWake}
             onCancelActive={handleCancelActive}
             onLogManualSession={handleLogManualSession}
+            dayContext={dayContext}
+            onUpsertDayContext={handleUpsertDayContext}
+            onSetMelatoninDoses={handleSetMelatoninDoses}
           />
         </>
       )}

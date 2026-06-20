@@ -6,7 +6,7 @@
  */
 
 import { supabase } from "../lib/supabase";
-import { DB_TABLES, MIN_SESSION_MINUTES } from "../lib/constants";
+import { DB_TABLES, MELATONIN_DOSES_RANGE, MIN_SESSION_MINUTES } from "../lib/constants";
 import type { SleepLog } from "../lib/types";
 
 const SLEEP_LOGS_TABLE = DB_TABLES.SLEEP_LOGS;
@@ -253,4 +253,30 @@ export async function getRecentLogs(days: number): Promise<SleepLog[]> {
 
   if (error) throw error;
   return (data ?? []) as SleepLog[];
+}
+
+/**
+ * Sets melatonin_doses on a specific session (the active one).
+ * Descriptive, not normative — records the user's real hypnotic-use protocol
+ * (3mg doses, +1/hour if not asleep). Clamped to the valid range [1, 3].
+ *
+ * @param logId  Target sleep_logs row id (typically the active session).
+ * @param doses  Number of doses taken this session.
+ * @returns The updated SleepLog row.
+ */
+export async function setMelatoninDoses(logId: string, doses: number): Promise<SleepLog> {
+  const clamped = Math.min(
+    Math.max(Math.round(doses), MELATONIN_DOSES_RANGE.min),
+    MELATONIN_DOSES_RANGE.max,
+  );
+
+  const { data, error } = await supabase
+    .from(SLEEP_LOGS_TABLE)
+    .update({ melatonin_doses: clamped })
+    .eq("id", logId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as SleepLog;
 }

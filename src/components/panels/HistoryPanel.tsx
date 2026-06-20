@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from "react";
 import { getRecentLogs } from "../../hooks/useSleepLog";
+import { getRecentContext } from "../../hooks/useDayContext";
 import { buildDaySlots, calcWeekStats } from "../../lib/sleep";
 import type { DaySlot, WeekStats } from "../../lib/sleep";
 import { SleepHistoryChart } from "../SleepHistoryChart";
@@ -62,8 +63,11 @@ export function HistoryPanel() {
   useEffect(() => {
     const load = async () => {
       try {
-        const logs = await getRecentLogs(HISTORY_DAYS);
-        const daySlots = buildDaySlots(logs);
+        const [logs, contexts] = await Promise.all([
+          getRecentLogs(HISTORY_DAYS),
+          getRecentContext(HISTORY_DAYS),
+        ]);
+        const daySlots = buildDaySlots(logs, contexts);
         const weekStats = calcWeekStats(daySlots);
         setSlots(daySlots);
         setStats(weekStats);

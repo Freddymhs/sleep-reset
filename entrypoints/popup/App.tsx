@@ -5,6 +5,7 @@ import { BottomNav } from "../../src/components/BottomNav";
 import type { ActivePanel } from "../../src/components/BottomNav";
 import { HomePanel } from "../../src/components/panels/HomePanel";
 import { HistoryPanel } from "../../src/components/panels/HistoryPanel";
+import { InsightsPanel } from "../../src/components/panels/InsightsPanel";
 import { SettingsPanel } from "../../src/components/panels/SettingsPanel";
 
 export default function App() {
@@ -69,6 +70,7 @@ export default function App() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {activePanel === "home" && <HomePanel />}
         {activePanel === "history" && <HistoryPanel />}
+        {activePanel === "insights" && <InsightsPanel />}
         {activePanel === "settings" && <SettingsPanel />}
       </main>
 

@@ -1,9 +1,9 @@
 /**
  * BottomNav — Fixed bottom navigation bar for the popup shell.
- * Three tabs: Home, History, Settings.
+ * Four tabs: Home, History, Insights, Settings.
  */
 
-export type ActivePanel = "home" | "history" | "settings";
+export type ActivePanel = "home" | "history" | "insights" | "settings";
 
 interface BottomNavProps {
   active: ActivePanel;
@@ -19,6 +19,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Home", icon: HomeIcon },
   { id: "history", label: "History", icon: CalendarIcon },
+  { id: "insights", label: "Insights", icon: ChartIcon },
   { id: "settings", label: "Settings", icon: GearIcon },
 ];
 
@@ -54,6 +55,14 @@ function HomeIcon() {
   return (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  );
+}
+
+function ChartIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6m4 6V5m4 14v-9M5 19h14" />
     </svg>
   );
 }
