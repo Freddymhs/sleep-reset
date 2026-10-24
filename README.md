@@ -1,3 +1,5 @@
+🤖 Proyecto asistido por IA — NO se contabiliza en CV/resume (no es práctica manual real).
+
 # template-chrome-extension
 
 Chrome Extension template built with WXT + React + TypeScript + TailwindCSS.
