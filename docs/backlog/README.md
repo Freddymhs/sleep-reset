@@ -1,5 +1,10 @@
 # Backlog — sleep-reset
 
+> **Retiro previsto (2026-10-24).** sleep-reset cumplió: el sueño se arregló. Se retira cuando el Apple Watch lo
+> reemplace — condición: `sleep_analysis` llegando de forma estable a health-records (`hae_metric_points`). La
+> melatonina pasa a ser un hecho fijo (1–2 cápsulas, domingo a jueves), no un registro diario. FASE_8 no se codea.
+> Decisión: `health-records/docs/decisions/DECISION_RUMBO_2026_10.md` (D-R3, D-R5).
+
 Chrome Extension (WXT + React 18 + TypeScript + TailwindCSS + Supabase OAuth).
 
 ## Fases
