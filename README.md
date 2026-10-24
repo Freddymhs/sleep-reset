@@ -26,7 +26,7 @@ src/
 ```bash
 npm install
 npm run dev        # opens Chrome with extension hot-reloaded
-npm run build      # production build → .output/chrome-mv3/
+npm run build      # production build → dist/chrome-mv3/
 npm run zip        # packages extension for Chrome Web Store
 ```
 

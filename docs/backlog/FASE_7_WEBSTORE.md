@@ -29,7 +29,7 @@
 - Comandos a verificar:
   1. `npm run build` → sin errores
   2. `npm run zip` → genera el .zip para subir a Web Store
-  3. Cargar el zip en Chrome (`chrome://extensions` → "Load unpacked" sobre el .output/chrome-mv3/) y probar flujo completo
+  3. Cargar el zip en Chrome (`chrome://extensions` → "Load unpacked" sobre el dist/chrome-mv3/) y probar flujo completo
   4. Verificar que OAuth funciona con la extensión instalada (el redirect URL cambia con el ID real)
 
 ### Tarea 7.D: Assets para Web Store
